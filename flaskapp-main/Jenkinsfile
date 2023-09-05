@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+  environment {
+    DOCKERHUB_CREDENTIALS = credentials('JenkinsLogin')
+  }
+  stages {
+    stage('Git') {
+      steps {
+        git branch: 'main', changelog: false, poll: false, url: 'https://github.com/joyienjoy/flaskapp.git'
+      }
+    }
+    stage('Build') {
+      steps {
+        sh 'docker build -t manoranjanmajumdar/manu .'
+      }
+    }
+    stage('Login') {
+      steps {
+        sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+      }
+    }
+    stage('Push') {
+      steps {
+        sh 'docker push manoranjanmajumdar/manu'
+        sh 'docker logout'
+      }
+    }
+  }
+}
